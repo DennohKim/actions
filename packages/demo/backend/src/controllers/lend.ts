@@ -92,6 +92,11 @@ export async function getMarkets(c: Context) {
     )
     return c.json({ markets: formattedMarkets })
   } catch (error) {
+    console.error('[getMarkets] ERROR:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return c.json(
       {
         error: 'Failed to get markets',
@@ -110,6 +115,11 @@ export async function getMarketsV1(c: Context) {
     const markets = await lendService.getMarkets()
     return c.json({ result: serializeBigInt(markets) })
   } catch (error) {
+    console.error('[getMarketsV1] ERROR:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return c.json(
       {
         error: 'Failed to get markets',

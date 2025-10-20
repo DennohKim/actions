@@ -232,9 +232,8 @@ function LentBalance({ markets, isInitialLoad = false }: LentBalanceProps) {
                       >
                         $
                         {
-                          formatDepositedAmount(
-                            market.depositedAmount || '0',
-                          ).main
+                          formatDepositedAmount(market.depositedAmount || '0')
+                            .main
                         }
                         <span
                           style={{
@@ -243,9 +242,8 @@ function LentBalance({ markets, isInitialLoad = false }: LentBalanceProps) {
                           }}
                         >
                           {
-                            formatDepositedAmount(
-                              market.depositedAmount || '0',
-                            ).secondary
+                            formatDepositedAmount(market.depositedAmount || '0')
+                              .secondary
                           }
                         </span>
                       </span>
