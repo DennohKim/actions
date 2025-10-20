@@ -1,21 +1,12 @@
-import morphoLogo from '../assets/morpho-logo-light.svg'
 import Shimmer from './Shimmer'
+import type { MarketPosition } from '@/types/market'
 
 interface LentBalanceProps {
-  depositedAmount: string | null
-  apy: number | null
-  isLoadingPosition: boolean
-  isLoadingApy: boolean
+  markets: MarketPosition[]
   isInitialLoad?: boolean
 }
 
-function LentBalance({
-  depositedAmount,
-  apy,
-  isLoadingPosition,
-  isLoadingApy,
-  isInitialLoad = false,
-}: LentBalanceProps) {
+function LentBalance({ markets, isInitialLoad = false }: LentBalanceProps) {
   // Format deposited amount to 4 decimals and return parts
   const formatDepositedAmount = (amount: string) => {
     const num = parseFloat(amount)
@@ -122,17 +113,89 @@ function LentBalance({
 
             {/* Body */}
             <tbody>
-              <tr>
-                <td style={{ padding: '16px 8px' }}>
-                  {isInitialLoad ? (
-                    <Shimmer width="120px" height="20px" borderRadius="4px" />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={morphoLogo}
-                        alt="Morpho"
-                        style={{ width: '20px', height: '20px' }}
-                      />
+              {markets.map((market, index) => (
+                <tr key={index}>
+                  <td style={{ padding: '16px 8px' }}>
+                    {isInitialLoad ? (
+                      <Shimmer width="120px" height="20px" borderRadius="4px" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={market.marketLogo}
+                          alt={market.marketName}
+                          style={{ width: '20px', height: '20px' }}
+                        />
+                        <span
+                          style={{
+                            color: '#1a1b1e',
+                            fontSize: '14px',
+                            fontWeight: 400,
+                            fontFamily: 'Inter',
+                          }}
+                        >
+                          {market.marketName}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '16px 8px' }}>
+                    {isInitialLoad ? (
+                      <Shimmer width="110px" height="20px" borderRadius="4px" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={market.networkLogo}
+                          alt={market.networkName}
+                          style={{ width: '20px', height: '20px' }}
+                        />
+                        <span
+                          style={{
+                            color: '#1a1b1e',
+                            fontSize: '14px',
+                            fontWeight: 400,
+                            fontFamily: 'Inter',
+                          }}
+                        >
+                          {market.networkName}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '16px 8px' }}>
+                    {isInitialLoad ? (
+                      <Shimmer width="60px" height="20px" borderRadius="4px" />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={market.assetLogo}
+                          alt={market.assetSymbol}
+                          style={{ width: '20px', height: '20px' }}
+                        />
+                        <span
+                          style={{
+                            color: '#1a1b1e',
+                            fontSize: '14px',
+                            fontWeight: 400,
+                            fontFamily: 'Inter',
+                          }}
+                        >
+                          {market.assetSymbol}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '16px 8px', textAlign: 'right' }}>
+                    {isInitialLoad || market.isLoadingApy ? (
+                      <div
+                        style={{ display: 'flex', justifyContent: 'flex-end' }}
+                      >
+                        <Shimmer
+                          width="50px"
+                          height="20px"
+                          borderRadius="4px"
+                        />
+                      </div>
+                    ) : (
                       <span
                         style={{
                           color: '#1a1b1e',
@@ -141,109 +204,55 @@ function LentBalance({
                           fontFamily: 'Inter',
                         }}
                       >
-                        Gauntlet
+                        {market.apy !== null
+                          ? `${(market.apy * 100).toFixed(2)}%`
+                          : '0.00%'}
                       </span>
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: '16px 8px' }}>
-                  {isInitialLoad ? (
-                    <Shimmer width="110px" height="20px" borderRadius="4px" />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="/base-logo.svg"
-                        alt="Base"
-                        style={{ width: '20px', height: '20px' }}
-                      />
+                    )}
+                  </td>
+                  <td style={{ padding: '16px 8px', textAlign: 'right' }}>
+                    {isInitialLoad || market.isLoadingPosition ? (
+                      <div
+                        style={{ display: 'flex', justifyContent: 'flex-end' }}
+                      >
+                        <Shimmer
+                          width="70px"
+                          height="20px"
+                          borderRadius="4px"
+                        />
+                      </div>
+                    ) : (
                       <span
                         style={{
                           color: '#1a1b1e',
                           fontSize: '14px',
-                          fontWeight: 400,
+                          fontWeight: 500,
                           fontFamily: 'Inter',
                         }}
                       >
-                        Base Sepolia
-                      </span>
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: '16px 8px' }}>
-                  {isInitialLoad ? (
-                    <Shimmer width="60px" height="20px" borderRadius="4px" />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="/usd-coin-usdc-logo.svg"
-                        alt="USDC"
-                        style={{ width: '20px', height: '20px' }}
-                      />
-                      <span
-                        style={{
-                          color: '#1a1b1e',
-                          fontSize: '14px',
-                          fontWeight: 400,
-                          fontFamily: 'Inter',
-                        }}
-                      >
-                        USDC
-                      </span>
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: '16px 8px', textAlign: 'right' }}>
-                  {isInitialLoad || isLoadingApy ? (
-                    <div
-                      style={{ display: 'flex', justifyContent: 'flex-end' }}
-                    >
-                      <Shimmer width="50px" height="20px" borderRadius="4px" />
-                    </div>
-                  ) : (
-                    <span
-                      style={{
-                        color: '#1a1b1e',
-                        fontSize: '14px',
-                        fontWeight: 400,
-                        fontFamily: 'Inter',
-                      }}
-                    >
-                      {apy !== null ? `${(apy * 100).toFixed(2)}%` : '0.00%'}
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: '16px 8px', textAlign: 'right' }}>
-                  {isInitialLoad || isLoadingPosition ? (
-                    <div
-                      style={{ display: 'flex', justifyContent: 'flex-end' }}
-                    >
-                      <Shimmer width="70px" height="20px" borderRadius="4px" />
-                    </div>
-                  ) : (
-                    <span
-                      style={{
-                        color: '#1a1b1e',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        fontFamily: 'Inter',
-                      }}
-                    >
-                      ${formatDepositedAmount(depositedAmount || '0').main}
-                      <span
-                        style={{
-                          color: '#9195A6',
-                          fontSize: '12px',
-                        }}
-                      >
+                        $
                         {
-                          formatDepositedAmount(depositedAmount || '0')
-                            .secondary
+                          formatDepositedAmount(
+                            market.depositedAmount || '0',
+                          ).main
                         }
+                        <span
+                          style={{
+                            color: '#9195A6',
+                            fontSize: '12px',
+                          }}
+                        >
+                          {
+                            formatDepositedAmount(
+                              market.depositedAmount || '0',
+                            ).secondary
+                          }
+                        </span>
                       </span>
-                    </span>
-                  )}
-                </td>
-              </tr>
+                    )}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
