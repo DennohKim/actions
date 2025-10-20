@@ -139,10 +139,25 @@ function Earn({
 
             <div className="space-y-6">
               <LentBalance
-                depositedAmount={depositedAmount}
-                apy={apy}
-                isLoadingPosition={isLoadingPosition}
-                isLoadingApy={isLoadingApy}
+                markets={[
+                  {
+                    marketName: 'Gauntlet',
+                    marketLogo: '/morpho-logo.svg',
+                    networkName: 'Base Sepolia',
+                    networkLogo: '/base-logo.svg',
+                    assetSymbol: 'USDC',
+                    assetLogo: '/usd-coin-usdc-logo.svg',
+                    apy,
+                    depositedAmount,
+                    isLoadingApy,
+                    isLoadingPosition,
+                    marketId: {
+                      address: '0x297E324C46309E93112610ebf35559685b4E3547',
+                      chainId: 84532,
+                    },
+                    provider: 'morpho',
+                  },
+                ]}
                 isInitialLoad={isInitialLoad}
               />
               <Action
