@@ -24,8 +24,10 @@ export const OPTIMISM_SEPOLIA = {
   rpcUrls: env.OPTIMISM_SEPOLIA_RPC_URL
     ? [env.OPTIMISM_SEPOLIA_RPC_URL]
     : undefined,
-  bundler: {
-    type: 'simple' as const,
-    url: env.OPTIMISM_SEPOLIA_BUNDLER_URL,
-  },
+  bundler: env.OPTIMISM_SEPOLIA_BUNDLER_URL
+    ? {
+        type: 'simple' as const,
+        url: env.OPTIMISM_SEPOLIA_BUNDLER_URL,
+      }
+    : undefined,
 }
