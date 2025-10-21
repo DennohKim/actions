@@ -1,8 +1,12 @@
+import { useEffect, useState } from 'react'
 import { Action } from './Action'
 import LentBalance from './LentBalance'
 import ActivityLog from './ActivityLog'
 import { WalletProviderDropdown } from './WalletProviderDropdown'
 import type { WalletProviderConfig } from '@/constants/walletProviders'
+import type { MarketPosition } from '@/types/market'
+import { actionsApi } from '@/api/actionsApi'
+
 export interface EarnContentProps {
   ready: boolean
   logout: () => Promise<void>
@@ -25,6 +29,18 @@ export interface EarnContentProps {
   }>
 }
 
+const NETWORK_LOGOS: Record<number, string> = {
+  130: '/Optimism.svg', // Use Optimism logo as fallback for Unichain
+  84532: '/base-logo.svg',
+  11155420: '/Optimism.svg',
+}
+
+const ASSET_LOGOS: Record<string, string> = {
+  USDC: '/usd-coin-usdc-logo.svg',
+  USDC_DEMO: '/usd-coin-usdc-logo.svg',
+  WETH: '/Optimism.svg', // Use Optimism logo as fallback for WETH
+}
+
 /**
  * Presentational component for the Earn page
  * Handles layout and user dropdown - all business logic delegated to container
@@ -39,11 +55,46 @@ function Earn({
   apy,
   isLoadingApy,
   depositedAmount,
-  isLoadingPosition,
-  isInitialLoad,
   onMintUSDC,
   onTransaction,
 }: EarnContentProps) {
+  const [markets, setMarkets] = useState<MarketPosition[]>([])
+  const [isLoadingMarkets, setIsLoadingMarkets] = useState(true)
+
+  useEffect(() => {
+    const fetchMarkets = async () => {
+      try {
+        setIsLoadingMarkets(true)
+        const markets = await actionsApi.getMarketsV1()
+
+        const marketPositions: MarketPosition[] = markets.map((market: any) => ({
+          marketName: market.name,
+          marketLogo: market.name.toLowerCase().includes('aave') ? '/aave-logo-dark.svg' : '/morpho-logo.svg',
+          networkName: market.marketId.chainId === 130 ? 'Unichain' :
+                       market.marketId.chainId === 84532 ? 'Base Sepolia' :
+                       market.marketId.chainId === 11155420 ? 'Optimism Sepolia' : 'Unknown',
+          networkLogo: NETWORK_LOGOS[market.marketId.chainId] || '/base-logo.svg',
+          assetSymbol: market.asset.metadata.symbol,
+          assetLogo: ASSET_LOGOS[market.asset.metadata.symbol] || '/usd-coin-usdc-logo.svg',
+          apy: market.apy.total,
+          depositedAmount: null,
+          isLoadingApy: false,
+          isLoadingPosition: false,
+          marketId: market.marketId,
+          provider: market.name.toLowerCase().includes('aave') ? 'aave' : 'morpho',
+        }))
+
+        setMarkets(marketPositions)
+      } catch (error) {
+        console.error('Error fetching markets:', error)
+      } finally {
+        setIsLoadingMarkets(false)
+      }
+    }
+
+    fetchMarkets()
+  }, [])
+
   // Show loading state while Privy is initializing
   if (!ready) {
     return (
@@ -139,26 +190,8 @@ function Earn({
 
             <div className="space-y-6">
               <LentBalance
-                markets={[
-                  {
-                    marketName: 'Gauntlet',
-                    marketLogo: '/morpho-logo.svg',
-                    networkName: 'Base Sepolia',
-                    networkLogo: '/base-logo.svg',
-                    assetSymbol: 'USDC',
-                    assetLogo: '/usd-coin-usdc-logo.svg',
-                    apy,
-                    depositedAmount,
-                    isLoadingApy,
-                    isLoadingPosition,
-                    marketId: {
-                      address: '0x297E324C46309E93112610ebf35559685b4E3547',
-                      chainId: 84532,
-                    },
-                    provider: 'morpho',
-                  },
-                ]}
-                isInitialLoad={isInitialLoad}
+                markets={markets}
+                isInitialLoad={isLoadingMarkets}
               />
               <Action
                 usdcBalance={usdcBalance}
