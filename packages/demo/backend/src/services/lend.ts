@@ -12,11 +12,7 @@ import { chainById } from '@eth-optimism/viem/chains'
 import { formatUnits } from 'viem'
 import { baseSepolia, unichain } from 'viem/chains'
 
-import {
-  getActions,
-  getAaveActions,
-  getMorphoActions,
-} from '../config/actions.js'
+import { getAaveActions, getMorphoActions } from '../config/actions.js'
 import { ALL_MARKETS } from '../config/markets.js'
 import type {
   FormattedMarketResponse,
@@ -33,7 +29,9 @@ function getActionsForMarket(marketId: LendMarketId) {
   )
 
   if (!market) {
-    throw new Error(`Market not found: ${marketId.address} on chain ${marketId.chainId}`)
+    throw new Error(
+      `Market not found: ${marketId.address} on chain ${marketId.chainId}`,
+    )
   }
 
   return market.lendProvider === 'morpho'
