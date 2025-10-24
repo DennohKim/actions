@@ -4,9 +4,16 @@ import type { MarketPosition } from '@/types/market'
 interface LentBalanceProps {
   markets: MarketPosition[]
   isInitialLoad?: boolean
+  selectedMarketId?: { address: string; chainId: number }
+  onMarketSelect?: (market: MarketPosition) => void
 }
 
-function LentBalance({ markets, isInitialLoad = false }: LentBalanceProps) {
+function LentBalance({
+  markets,
+  isInitialLoad = false,
+  selectedMarketId,
+  onMarketSelect,
+}: LentBalanceProps) {
   // Format deposited amount to 4 decimals and return parts
   const formatDepositedAmount = (amount: string) => {
     const num = parseFloat(amount)
@@ -113,144 +120,188 @@ function LentBalance({ markets, isInitialLoad = false }: LentBalanceProps) {
 
             {/* Body */}
             <tbody>
-              {markets.map((market, index) => (
-                <tr key={index}>
-                  <td style={{ padding: '16px 8px' }}>
-                    {isInitialLoad ? (
-                      <Shimmer width="120px" height="20px" borderRadius="4px" />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={market.marketLogo}
-                          alt={market.marketName}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                        <span
-                          style={{
-                            color: '#1a1b1e',
-                            fontSize: '14px',
-                            fontWeight: 400,
-                            fontFamily: 'Inter',
-                          }}
-                        >
-                          {market.marketName}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px 8px' }}>
-                    {isInitialLoad ? (
-                      <Shimmer width="110px" height="20px" borderRadius="4px" />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={market.networkLogo}
-                          alt={market.networkName}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                        <span
-                          style={{
-                            color: '#1a1b1e',
-                            fontSize: '14px',
-                            fontWeight: 400,
-                            fontFamily: 'Inter',
-                          }}
-                        >
-                          {market.networkName}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px 8px' }}>
-                    {isInitialLoad ? (
-                      <Shimmer width="60px" height="20px" borderRadius="4px" />
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={market.assetLogo}
-                          alt={market.assetSymbol}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                        <span
-                          style={{
-                            color: '#1a1b1e',
-                            fontSize: '14px',
-                            fontWeight: 400,
-                            fontFamily: 'Inter',
-                          }}
-                        >
-                          {market.assetSymbol}
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px 8px', textAlign: 'right' }}>
-                    {isInitialLoad || market.isLoadingApy ? (
-                      <div
-                        style={{ display: 'flex', justifyContent: 'flex-end' }}
-                      >
+              {markets.map((market, index) => {
+                const isSelected =
+                  selectedMarketId &&
+                  market.marketId.address.toLowerCase() ===
+                    selectedMarketId.address.toLowerCase() &&
+                  market.marketId.chainId === selectedMarketId.chainId
+                return (
+                  <tr
+                    key={index}
+                    onClick={() => onMarketSelect?.(market)}
+                    style={{
+                      cursor: onMarketSelect ? 'pointer' : 'default',
+                      backgroundColor: isSelected ? '#F5F5F7' : 'transparent',
+                      transition: 'background-color 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (onMarketSelect && !isSelected) {
+                        e.currentTarget.style.backgroundColor = '#FAFAFA'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                      }
+                    }}
+                  >
+                    <td style={{ padding: '16px 8px' }}>
+                      {isInitialLoad ? (
                         <Shimmer
-                          width="50px"
+                          width="120px"
                           height="20px"
                           borderRadius="4px"
                         />
-                      </div>
-                    ) : (
-                      <span
-                        style={{
-                          color: '#1a1b1e',
-                          fontSize: '14px',
-                          fontWeight: 400,
-                          fontFamily: 'Inter',
-                        }}
-                      >
-                        {market.apy !== null
-                          ? `${(market.apy * 100).toFixed(2)}%`
-                          : '0.00%'}
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px 8px', textAlign: 'right' }}>
-                    {isInitialLoad || market.isLoadingPosition ? (
-                      <div
-                        style={{ display: 'flex', justifyContent: 'flex-end' }}
-                      >
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={market.marketLogo}
+                            alt={market.marketName}
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                          <span
+                            style={{
+                              color: '#1a1b1e',
+                              fontSize: '14px',
+                              fontWeight: 400,
+                              fontFamily: 'Inter',
+                            }}
+                          >
+                            {market.marketName}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 8px' }}>
+                      {isInitialLoad ? (
                         <Shimmer
-                          width="70px"
+                          width="110px"
                           height="20px"
                           borderRadius="4px"
                         />
-                      </div>
-                    ) : (
-                      <span
-                        style={{
-                          color: '#1a1b1e',
-                          fontSize: '14px',
-                          fontWeight: 500,
-                          fontFamily: 'Inter',
-                        }}
-                      >
-                        $
-                        {
-                          formatDepositedAmount(market.depositedAmount || '0')
-                            .main
-                        }
-                        <span
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={market.networkLogo}
+                            alt={market.networkName}
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                          <span
+                            style={{
+                              color: '#1a1b1e',
+                              fontSize: '14px',
+                              fontWeight: 400,
+                              fontFamily: 'Inter',
+                            }}
+                          >
+                            {market.networkName}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 8px' }}>
+                      {isInitialLoad ? (
+                        <Shimmer
+                          width="60px"
+                          height="20px"
+                          borderRadius="4px"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={market.assetLogo}
+                            alt={market.assetSymbol}
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                          <span
+                            style={{
+                              color: '#1a1b1e',
+                              fontSize: '14px',
+                              fontWeight: 400,
+                              fontFamily: 'Inter',
+                            }}
+                          >
+                            {market.assetSymbol}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 8px', textAlign: 'right' }}>
+                      {isInitialLoad || market.isLoadingApy ? (
+                        <div
                           style={{
-                            color: '#9195A6',
-                            fontSize: '12px',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
                           }}
                         >
+                          <Shimmer
+                            width="50px"
+                            height="20px"
+                            borderRadius="4px"
+                          />
+                        </div>
+                      ) : (
+                        <span
+                          style={{
+                            color: '#1a1b1e',
+                            fontSize: '14px',
+                            fontWeight: 400,
+                            fontFamily: 'Inter',
+                          }}
+                        >
+                          {market.apy !== null
+                            ? `${(market.apy * 100).toFixed(2)}%`
+                            : '0.00%'}
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ padding: '16px 8px', textAlign: 'right' }}>
+                      {isInitialLoad || market.isLoadingPosition ? (
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                          }}
+                        >
+                          <Shimmer
+                            width="70px"
+                            height="20px"
+                            borderRadius="4px"
+                          />
+                        </div>
+                      ) : (
+                        <span
+                          style={{
+                            color: '#1a1b1e',
+                            fontSize: '14px',
+                            fontWeight: 500,
+                            fontFamily: 'Inter',
+                          }}
+                        >
+                          $
                           {
                             formatDepositedAmount(market.depositedAmount || '0')
-                              .secondary
+                              .main
                           }
+                          <span
+                            style={{
+                              color: '#9195A6',
+                              fontSize: '12px',
+                            }}
+                          >
+                            {
+                              formatDepositedAmount(
+                                market.depositedAmount || '0',
+                              ).secondary
+                            }
+                          </span>
                         </span>
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

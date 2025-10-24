@@ -3,12 +3,14 @@ import TransactionModal from './TransactionModal'
 import Shimmer from './Shimmer'
 
 interface ActionProps {
-  usdcBalance: string
+  assetBalance: string
   isLoadingBalance: boolean
   apy: number | null
   isLoadingApy: boolean
   depositedAmount: string | null
-  onMintUSDC?: () => void
+  assetSymbol: string
+  assetLogo: string
+  onMintAsset?: () => void
   onTransaction: (
     mode: 'lend' | 'withdraw',
     amount: number,
@@ -23,12 +25,14 @@ interface ActionProps {
  * Handles UI state and user interactions, delegates business logic to container
  */
 export function Action({
-  usdcBalance,
+  assetBalance,
   isLoadingBalance,
   apy,
   isLoadingApy,
   depositedAmount,
-  onMintUSDC,
+  assetSymbol,
+  assetLogo,
+  onMintAsset,
   onTransaction,
 }: ActionProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -47,7 +51,7 @@ export function Action({
   )
 
   const handleMaxClick = () => {
-    const maxAmount = mode === 'lend' ? usdcBalance : depositedAmount || '0'
+    const maxAmount = mode === 'lend' ? assetBalance : depositedAmount || '0'
     const rounded = parseFloat(maxAmount).toFixed(2)
     setAmount(rounded)
   }
@@ -68,7 +72,7 @@ export function Action({
     const amountValue = parseFloat(amount)
     const maxAmount =
       mode === 'lend'
-        ? parseFloat(usdcBalance)
+        ? parseFloat(assetBalance)
         : parseFloat(depositedAmount || '0')
     if (amountValue > maxAmount) {
       return
@@ -122,12 +126,10 @@ export function Action({
           <div className="flex items-center gap-2">
             {isLoadingBalance ? (
               <Shimmer width="60px" height="20px" borderRadius="4px" />
-            ) : !usdcBalance ||
-              usdcBalance === '0.00' ||
-              usdcBalance === '0' ||
-              parseFloat(usdcBalance || '0') === 0 ? (
+            ) : parseFloat(assetBalance || '0') === 0 ? (
+              // Show mint button when balance is 0
               <button
-                onClick={onMintUSDC}
+                onClick={onMintAsset}
                 className="flex items-center gap-1.5 py-1.5 px-3 transition-all hover:bg-gray-50"
                 style={{
                   backgroundColor: '#FFFFFF',
@@ -140,7 +142,7 @@ export function Action({
                   fontFamily: 'Inter',
                 }}
               >
-                Get 100 USDC
+                Get 100 {assetSymbol}
               </button>
             ) : (
               <span
@@ -150,12 +152,12 @@ export function Action({
                   fontWeight: 500,
                 }}
               >
-                ${usdcBalance}
+                ${assetBalance}
               </span>
             )}
             <img
-              src="/usd-coin-usdc-logo.svg"
-              alt="USDC"
+              src={assetLogo}
+              alt={assetSymbol}
               style={{
                 width: '20px',
                 height: '20px',
@@ -393,7 +395,7 @@ export function Action({
                   fontFamily: 'Inter',
                 }}
               >
-                USDC
+                {assetSymbol}
               </span>
             </div>
           </div>
@@ -406,7 +408,9 @@ export function Action({
             !amount ||
             parseFloat(amount) <= 0 ||
             parseFloat(amount) >
-              parseFloat(mode === 'lend' ? usdcBalance : depositedAmount || '0')
+              parseFloat(
+                mode === 'lend' ? assetBalance : depositedAmount || '0',
+              )
           }
           className="w-full py-3 px-4 font-medium transition-all"
           style={{
@@ -416,7 +420,7 @@ export function Action({
               parseFloat(amount) <= 0 ||
               parseFloat(amount) >
                 parseFloat(
-                  mode === 'lend' ? usdcBalance : depositedAmount || '0',
+                  mode === 'lend' ? assetBalance : depositedAmount || '0',
                 )
                 ? '#D1D5DB'
                 : '#FF0420',
@@ -426,7 +430,7 @@ export function Action({
               parseFloat(amount) <= 0 ||
               parseFloat(amount) >
                 parseFloat(
-                  mode === 'lend' ? usdcBalance : depositedAmount || '0',
+                  mode === 'lend' ? assetBalance : depositedAmount || '0',
                 )
                 ? '#6B7280'
                 : '#FFFFFF',
@@ -439,7 +443,7 @@ export function Action({
               parseFloat(amount) <= 0 ||
               parseFloat(amount) >
                 parseFloat(
-                  mode === 'lend' ? usdcBalance : depositedAmount || '0',
+                  mode === 'lend' ? assetBalance : depositedAmount || '0',
                 )
                 ? 'not-allowed'
                 : 'pointer',
@@ -449,8 +453,8 @@ export function Action({
           {isLoading
             ? 'Processing...'
             : mode === 'lend'
-              ? 'Lend USDC'
-              : 'Withdraw USDC'}
+              ? `Lend ${assetSymbol}`
+              : `Withdraw ${assetSymbol}`}
         </button>
       </div>
 

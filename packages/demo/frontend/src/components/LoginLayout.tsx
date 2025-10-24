@@ -25,11 +25,7 @@ export function LoginLayout({ onSignIn, additionalContent }: LoginLayoutProps) {
         >
           <div className="max-w-md text-center p-8">
             <div className="mb-6">
-              <img
-                src="/Optimism.svg"
-                alt="Optimism"
-                className="h-12 mx-auto mb-4"
-              />
+              <img src="/OP.svg" alt="Optimism" className="h-12 mx-auto mb-4" />
               <h1
                 className="mb-3"
                 style={{

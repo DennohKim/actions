@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { USDCDemoVault } from '@/constants/markets'
 import { env } from '@/envVars'
 import {
   createActions,
   type ReactActionsConfig,
 } from '@eth-optimism/actions-sdk/react'
-import { baseSepolia } from 'viem/chains'
+import { baseSepolia, optimismSepolia } from 'viem/chains'
 
 export function useActions() {
   // Memoize the config to prevent recreating it on every render
@@ -26,7 +25,8 @@ export function useActions() {
       },
       lend: {
         provider: 'morpho',
-        marketAllowlist: [USDCDemoVault],
+        // Remove marketAllowlist to disable validation for demo
+        marketAllowlist: [],
       },
       chains: [
         {
@@ -39,6 +39,12 @@ export function useActions() {
                 type: 'simple',
                 url: env.VITE_BASE_SEPOLIA_BUNDER_URL,
               }
+            : undefined,
+        },
+        {
+          chainId: optimismSepolia.id,
+          rpcUrls: env.VITE_OPTIMISM_SEPOLIA_RPC_URL
+            ? [env.VITE_OPTIMISM_SEPOLIA_RPC_URL]
             : undefined,
         },
       ],

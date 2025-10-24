@@ -5,6 +5,7 @@ import ActivityLog from './ActivityLog'
 import { WalletProviderDropdown } from './WalletProviderDropdown'
 import type { WalletProviderConfig } from '@/constants/walletProviders'
 import type { MarketPosition } from '@/types/market'
+import type { LendMarket } from '@eth-optimism/actions-sdk/react'
 import { actionsApi } from '@/api/actionsApi'
 
 export interface EarnContentProps {
@@ -27,18 +28,19 @@ export interface EarnContentProps {
     transactionHash?: string
     blockExplorerUrl?: string
   }>
+  onMarketChange?: (market: MarketPosition) => void
 }
 
 const NETWORK_LOGOS: Record<number, string> = {
-  130: '/Optimism.svg', // Use Optimism logo as fallback for Unichain
+  130: '/OP.svg', // Use OP logo as fallback for Unichain
   84532: '/base-logo.svg',
-  11155420: '/Optimism.svg',
+  11155420: '/OP.svg',
 }
 
 const ASSET_LOGOS: Record<string, string> = {
   USDC: '/usd-coin-usdc-logo.svg',
   USDC_DEMO: '/usd-coin-usdc-logo.svg',
-  WETH: '/Optimism.svg', // Use Optimism logo as fallback for WETH
+  WETH: '/eth.svg',
 }
 
 /**
@@ -57,9 +59,18 @@ function Earn({
   depositedAmount,
   onMintUSDC,
   onTransaction,
+  onMarketChange,
 }: EarnContentProps) {
   const [markets, setMarkets] = useState<MarketPosition[]>([])
   const [isLoadingMarkets, setIsLoadingMarkets] = useState(true)
+  const [selectedMarket, setSelectedMarket] = useState<MarketPosition | null>(
+    null,
+  )
+
+  const handleMarketSelect = (market: MarketPosition) => {
+    setSelectedMarket(market)
+    onMarketChange?.(market)
+  }
 
   useEffect(() => {
     const fetchMarkets = async () => {
@@ -67,24 +78,43 @@ function Earn({
         setIsLoadingMarkets(true)
         const markets = await actionsApi.getMarketsV1()
 
-        const marketPositions: MarketPosition[] = markets.map((market: any) => ({
-          marketName: market.name,
-          marketLogo: market.name.toLowerCase().includes('aave') ? '/aave-logo-dark.svg' : '/morpho-logo.svg',
-          networkName: market.marketId.chainId === 130 ? 'Unichain' :
-                       market.marketId.chainId === 84532 ? 'Base Sepolia' :
-                       market.marketId.chainId === 11155420 ? 'Optimism Sepolia' : 'Unknown',
-          networkLogo: NETWORK_LOGOS[market.marketId.chainId] || '/base-logo.svg',
-          assetSymbol: market.asset.metadata.symbol,
-          assetLogo: ASSET_LOGOS[market.asset.metadata.symbol] || '/usd-coin-usdc-logo.svg',
-          apy: market.apy.total,
-          depositedAmount: null,
-          isLoadingApy: false,
-          isLoadingPosition: false,
-          marketId: market.marketId,
-          provider: market.name.toLowerCase().includes('aave') ? 'aave' : 'morpho',
-        }))
+        const marketPositions: MarketPosition[] = markets.map(
+          (market: LendMarket) => ({
+            marketName: market.name,
+            marketLogo: market.name.toLowerCase().includes('aave')
+              ? '/aave-logo-dark.svg'
+              : '/morpho-logo.svg',
+            networkName:
+              market.marketId.chainId === 130
+                ? 'Unichain'
+                : market.marketId.chainId === 84532
+                  ? 'Base Sepolia'
+                  : market.marketId.chainId === 11155420
+                    ? 'Optimism Sepolia'
+                    : 'Unknown',
+            networkLogo:
+              NETWORK_LOGOS[market.marketId.chainId] || '/base-logo.svg',
+            assetSymbol: market.asset.metadata.symbol,
+            assetLogo:
+              ASSET_LOGOS[market.asset.metadata.symbol] ||
+              '/usd-coin-usdc-logo.svg',
+            apy: market.apy.total,
+            depositedAmount: null,
+            isLoadingApy: false,
+            isLoadingPosition: false,
+            marketId: market.marketId,
+            provider: market.name.toLowerCase().includes('aave')
+              ? 'aave'
+              : 'morpho',
+          }),
+        )
 
         setMarkets(marketPositions)
+        // Set the first market as selected by default
+        if (marketPositions.length > 0) {
+          setSelectedMarket(marketPositions[0])
+          onMarketChange?.(marketPositions[0])
+        }
       } catch (error) {
         console.error('Error fetching markets:', error)
       } finally {
@@ -130,7 +160,7 @@ function Earn({
         <div className="w-full px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src="/Optimism.svg" alt="Optimism" className="h-4" />
+              <img src="/OP.svg" alt="Optimism" className="h-4" />
             </div>
             <div className="flex items-center gap-4">
               <WalletProviderDropdown
@@ -192,14 +222,24 @@ function Earn({
               <LentBalance
                 markets={markets}
                 isInitialLoad={isLoadingMarkets}
+                selectedMarketId={selectedMarket?.marketId}
+                onMarketSelect={handleMarketSelect}
               />
               <Action
-                usdcBalance={usdcBalance}
+                assetBalance={usdcBalance}
                 isLoadingBalance={isLoadingBalance}
-                apy={apy}
-                isLoadingApy={isLoadingApy}
-                depositedAmount={depositedAmount}
-                onMintUSDC={onMintUSDC}
+                apy={selectedMarket?.apy ?? apy}
+                isLoadingApy={
+                  selectedMarket ? selectedMarket.isLoadingApy : isLoadingApy
+                }
+                depositedAmount={
+                  selectedMarket?.depositedAmount ?? depositedAmount
+                }
+                assetSymbol={selectedMarket?.assetSymbol ?? 'USDC'}
+                assetLogo={
+                  selectedMarket?.assetLogo ?? '/usd-coin-usdc-logo.svg'
+                }
+                onMintAsset={onMintUSDC}
                 onTransaction={onTransaction}
               />
             </div>

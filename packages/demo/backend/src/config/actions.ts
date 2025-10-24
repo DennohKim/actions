@@ -4,11 +4,7 @@ import { PrivyClient } from '@privy-io/server-auth'
 
 import { BASE_SEPOLIA, OPTIMISM_SEPOLIA, UNICHAIN } from './chains.js'
 import { env } from './env.js'
-import {
-  AaveWETHOptimismSepolia,
-  GauntletUSDC,
-  USDCDemoVault,
-} from './markets.js'
+import { AaveWETH, GauntletUSDCDemo } from './markets.js'
 
 let morphoActionsInstance: ReturnType<typeof createActions<'privy'>>
 let aaveActionsInstance: ReturnType<typeof createActions<'privy'>>
@@ -38,7 +34,7 @@ export function createMorphoActionsConfig(): NodeActionsConfig<'privy'> {
     lend: {
       provider: 'morpho',
       defaultSlippage: 50,
-      marketAllowlist: [GauntletUSDC, USDCDemoVault],
+      marketAllowlist: [GauntletUSDCDemo],
     },
     chains: [UNICHAIN, BASE_SEPOLIA, OPTIMISM_SEPOLIA],
   }
@@ -50,7 +46,7 @@ export function createAaveActionsConfig(): NodeActionsConfig<'privy'> {
     lend: {
       provider: 'aave',
       defaultSlippage: 50,
-      marketAllowlist: [AaveWETHOptimismSepolia],
+      marketAllowlist: [AaveWETH],
     },
     chains: [UNICHAIN, BASE_SEPOLIA, OPTIMISM_SEPOLIA],
   }
